@@ -283,9 +283,13 @@ def main():
             gr.Markdown("## Base Image")
 
             with gr.Row():
-                detail_base_img_path = [gr.Image(label="Detail Base Input Image", type='filepath')]*50
-                detail_base_img_caption = [gr.Textbox(label="Caption Text")]*50
-                analyze_base_img_button = [gr.Button("Analyze Tags for Base Image")]*50
+                detail_base_img_path = []
+                detail_base_img_caption = []
+                analyze_base_img_button = []
+                for i in range(50):
+                    detail_base_img_path.append(gr.Image(label="Detail Base Input Image", type='filepath'))
+                    detail_base_img_caption.append(gr.Textbox(label="Caption Text"))
+                    analyze_base_img_button.append(gr.Button("Analyze Tags for Base Image"))
 
             gr.Markdown("## Input Image")
 
