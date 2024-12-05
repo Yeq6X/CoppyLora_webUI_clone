@@ -297,10 +297,15 @@ def main():
 
             with gr.Column():
                 base_imgs = []
+                input_imgs = []
                 detail_base_img_paths = []
                 detail_base_img_captions = []
                 analyze_base_img_buttons = []
+                detail_input_image_paths = []
+                detail_input_image_captions = []
+                analyze_input_img_buttons = []
                 for i in range(50):
+                    gr.Markdown(f"### Image {i + 1}")
                     with gr.Row(visible=False) as row:
                         detail_base_img_path = gr.Image(label="Detail Base Input Image", type='filepath')
                         detail_base_img_caption = gr.Textbox(label="Caption Text")
@@ -316,14 +321,6 @@ def main():
 
                     base_imgs.append(row)
 
-            gr.Markdown("## Input Image")
-
-            with gr.Column():
-                input_imgs = []
-                detail_input_image_paths = []
-                detail_input_image_captions = []
-                analyze_input_img_buttons = []
-                for i in range(50):
                     with gr.Row(visible=False) as row:
                         detail_input_image_path = gr.Image(label="Detail Input Image", type='filepath')
                         detail_input_image_caption = gr.Textbox(label="Caption Text")
