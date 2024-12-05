@@ -357,15 +357,6 @@ def main():
             outputs=detail_output_file
         )
 
-        # タグ分析ボタンの設定
-        for i in range(50):
-            
-            analyze_input_img_button[i].click(
-                fn=analyze_tags,
-                inputs=[detail_input_image_path],
-                outputs=detail_input_image_caption
-            )
-
     demo.queue()
     port = find_free_port()
     url = f"http://127.0.0.1:{port}"
