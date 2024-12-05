@@ -92,16 +92,16 @@ def analyze_tags(image_path):
 def detail_train(
         base_model,
         detail_lora_name,
-        detail_base_img_path,
-        detail_base_img_caption,
-        detail_input_image_path,
-        detail_input_image_caption,
+        _detail_base_img_path,
+        _detail_base_img_caption,
+        _detail_input_image_path,
+        _detail_input_image_caption,
         image_num
     ):
-    detail_base_img_path = detail_base_img_path[:image_num]
-    detail_base_img_caption = detail_base_img_caption[:image_num]
-    detail_input_image_path = detail_input_image_path[:image_num]
-    detail_input_image_caption = detail_input_image_caption[:image_num]
+    detail_base_img_path = [gr.update(value=img) for img in _detail_base_img_path.values()][:image_num]
+    detail_base_img_caption = [gr.update(value=text) for text in _detail_base_img_caption.values()][:image_num]
+    detail_input_image_path = [gr.update(value=img) for img in _detail_input_image_path.values()][:image_num]
+    detail_input_image_caption = [gr.update(value=text) for text in _detail_input_image_caption.values()][:image_num]
 
     # 学習データのセットアップ
     if os.path.exists(image_dir):
@@ -332,7 +332,15 @@ def main():
 
         detail_train_button.click(
             fn=detail_train,
-            inputs=[base_model, detail_lora_name, detail_base_img_path, detail_base_img_caption, detail_input_image_path, detail_input_image_caption, image_num],
+            inputs=[
+                base_model,
+                detail_lora_name,
+                {img: img for img in detail_base_img_path},
+                {text: text for text in detail_base_img_caption},
+                {img: img for img in detail_input_image_path},
+                {text: text for text in detail_input_image_caption},
+                image_num
+            ],
             outputs=detail_output_file
         )
 
