@@ -193,7 +193,7 @@ def detail_train(
 
         for size in [1024, 768, 512]:
             resize_image = input_image.resize((size, size))
-            resize_image.save(os.path.join(image_dir, f"{size}.png"))
+            resize_image.save(os.path.join(image_dir, f"{i}_{size}.png"))
 
             caption_size_txt = os.path.join(image_dir, f"{i}_{size}.txt")
             with open(caption_size_txt, "w") as f2:
