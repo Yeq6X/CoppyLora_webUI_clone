@@ -291,7 +291,7 @@ def main():
                 base_model = gr.Dropdown(label="Base Model", choices=base_model_options, value="animagine-xl-3.1.safetensors")
                 update_button = gr.Button("List Update")
 
-            image_num = gr.Slider(label="Number of Images", value=1, minimum=0, maximum=50, step=1)
+            image_num = gr.Slider(label="Number of Images", value=0, minimum=0, maximum=50, step=1)
 
             with gr.Column():
                 img_rows = []
@@ -366,7 +366,7 @@ def main():
             inputs=[image_num],
             outputs = img_rows
         )
-        img_rows = update_imgs_visibility(1)
+        image_num = 1
 
     demo.queue()
     port = find_free_port()
