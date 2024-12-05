@@ -92,7 +92,8 @@ def detail_train(
         base_model,
         detail_lora_name,
         image_num,
-        num_epochs,
+        num_repeats,
+        max_train_steps,
         *args,
     ):
     detail_base_img_path = args[:50][:image_num]
@@ -100,11 +101,12 @@ def detail_train(
     detail_input_image_path = args[100:150][:image_num]
     detail_input_image_caption = args[150:][:image_num]
 
-    image_dir = os.path.join(train_data_dir, f"{num_epochs}")
+    image_dir = os.path.join(train_data_dir, f"{num_repeats}")
 
     # 学習データのセットアップ
-    if os.path.exists(image_dir):
-        shutil.rmtree(image_dir)
+    if os.path.exists(train_data_dir):
+        shutil.rmtree(train_data_dir)
+    os.makedirs(train_data_dir)
     os.makedirs(image_dir)
 
     output_dir = os.path.join(path, "output")
@@ -137,7 +139,7 @@ def detail_train(
         "train_data_dir": config["train_data_dir"],
         "output_dir": config["output_dir"],
         "output_name": base_lora_name,
-        "max_train_steps": config["max_train_steps"],
+        "max_train_steps": max_train_steps,
         "network_module": config["network_module"],
         "xformers": config["xformers"],
         "gradient_checkpointing": config["gradient_checkpointing"],
@@ -203,7 +205,7 @@ def detail_train(
         "train_data_dir": config["train_data_dir"],
         "output_dir": config["output_dir"],
         "output_name": kari_lora_name,
-        "max_train_steps": config["max_train_steps"],
+        "max_train_steps": max_train_steps,
         "network_module": config["network_module"],
         "xformers": config["xformers"],
         "gradient_checkpointing": config["gradient_checkpointing"],
@@ -295,7 +297,8 @@ def main():
                 
             with gr.Row():
                 image_num = gr.Number(label="Number of Images", value=0, minimum=0, maximum=50, step=1)
-                num_epochs = gr.Number(label="Number of Epochs", value=4000, minimum=0, maximum=100000, step=1000)
+                num_repeats = gr.Number(label="num_repeats", value=4000, minimum=0, maximum=100000, step=1000)
+                max_train_steps = gr.Number(label="max_train_steps", value=1000, minimum=0, maximum=1000000, step=1000)
 
             with gr.Column():
                 img_rows = []
@@ -354,7 +357,8 @@ def main():
                 base_model,
                 detail_lora_name,
                 image_num,
-                num_epochs,
+                num_repeats,
+                max_train_steps,
                 *detail_base_img_paths,
                 *detail_base_img_captions,
                 *detail_input_image_paths,
