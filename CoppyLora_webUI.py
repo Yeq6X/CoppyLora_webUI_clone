@@ -366,6 +366,7 @@ def main():
         )
         
         def update_imgs_visibility(num):
+            print("update_imgs_visibility", num)
             for i in range(50):
                 base_imgs[i].visible = i < num
                 input_imgs[i].visible = i < num
