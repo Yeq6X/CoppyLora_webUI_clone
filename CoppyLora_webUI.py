@@ -81,13 +81,6 @@ def find_free_port(start_port=7860):
             continue
     raise RuntimeError("No free ports available.")  # 空いているポートが見つからなかった場合
 
-def detail_setup_caption(caption_text):
-    # 各サイズごとにキャプションファイルをコピー
-    for size in [1024, 768, 512]:
-        caption_size_txt = os.path.join(image_dir, f"{size}.txt")
-        with open(caption_size_txt, "w") as f2:
-            f2.write(caption_text)
-
 def analyze_tags(image_path):
     """画像に対してタグ分析を行い、タグテキストを返す関数"""
     if not os.path.exists(image_path):
@@ -96,24 +89,43 @@ def analyze_tags(image_path):
     tag_text = tagger.analysis(image_path, tagger_model_location, tagger_model)  # taggerモジュールのanalysis関数を使用
     return tag_text
 
-def detail_train(base_model, detail_lora_name, detail_base_img_path, detail_base_img_caption, detail_input_image_path, detail_input_image_caption):
+def detail_train(
+        base_model,
+        detail_lora_name,
+        detail_base_img_path,
+        detail_base_img_caption,
+        detail_input_image_path,
+        detail_input_image_caption,
+        image_num
+    ):
+    detail_base_img_path = detail_base_img_path[:image_num]
+    detail_base_img_caption = detail_base_img_caption[:image_num]
+    detail_input_image_path = detail_input_image_path[:image_num]
+    detail_input_image_caption = detail_input_image_caption[:image_num]
+
+    # 学習データのセットアップ
     if os.path.exists(image_dir):
         shutil.rmtree(image_dir)
     os.makedirs(image_dir)
+
     output_dir = os.path.join(path, "output")
 
     if os.path.exists(output_dir):
         shutil.rmtree(output_dir)
     os.makedirs(output_dir)
-    
-    input_image = Image.open(detail_base_img_path)
 
-    for size in [1024, 768, 512]:
-        resize_image = input_image.resize((size, size))
-        resize_image.save(os.path.join(image_dir, f"{size}.png"))
+    for i in range(image_num):
+        input_image = Image.open(detail_base_img_path[i])
 
-    detail_setup_caption(detail_base_img_caption)
+        for size in [1024, 768, 512]:
+            resize_image = input_image.resize((size, size))
+            resize_image.save(os.path.join(image_dir, f"{i}_{size}.png"))
 
+            caption_size_txt = os.path.join(image_dir, f"{i}_{size}.txt")
+            with open(caption_size_txt, "w") as f2:
+                f2.write(detail_base_img_caption[i])
+
+    # 訓練のセットアップ
     with open(config_path, 'r') as f:
         config = toml.load(f)
 
@@ -169,18 +181,22 @@ def detail_train(base_model, detail_lora_name, detail_base_img_path, detail_base
         setattr(args, key, value)
     trainer = sdxl_train_network.SdxlNetworkTrainer()
     trainer.train(args)
-
+    
+    # 学習データのセットアップ
     if os.path.exists(image_dir):
         shutil.rmtree(image_dir)
     os.makedirs(image_dir)
-   
-    input_image = Image.open(detail_input_image_path)
 
-    for size in [1024, 768, 512]:
-        resize_image = input_image.resize((size, size))
-        resize_image.save(os.path.join(image_dir, f"{size}.png"))
+    for i in range(image_num):    
+        input_image = Image.open(detail_input_image_path[i])
 
-    detail_setup_caption(detail_input_image_caption)
+        for size in [1024, 768, 512]:
+            resize_image = input_image.resize((size, size))
+            resize_image.save(os.path.join(image_dir, f"{size}.png"))
+
+            caption_size_txt = os.path.join(image_dir, f"{i}_{size}.txt")
+            with open(caption_size_txt, "w") as f2:
+                f2.write(detail_input_image_caption[i])
 
     kari_lora_name = "copi-ki-kari"
     args_dict = {
@@ -294,9 +310,13 @@ def main():
             gr.Markdown("## Input Image")
 
             with gr.Row():
-                detail_input_image_path = gr.Image(label="Detail Input Image", type='filepath')
-                detail_input_image_caption = gr.Textbox(label="Caption Text")
-                analyze_input_img_button = gr.Button("Analyze Tags for Input Image")
+                detail_input_image_path = []
+                detail_input_image_caption = []
+                analyze_input_img_button = []
+                for i in range(50):
+                    detail_input_image_path.append(gr.Image(label="Detail Input Image", type='filepath'))
+                    detail_input_image_caption.append(gr.Textbox(label="Caption Text"))
+                    analyze_input_img_button.append(gr.Button("Analyze Tags for Input Image"))
 
             detail_lora_name = gr.Textbox(label="LoRa Name", value="mylora")
             detail_train_button = gr.Button("Train")
@@ -312,22 +332,23 @@ def main():
 
         detail_train_button.click(
             fn=detail_train,
-            inputs=[base_model, detail_lora_name, detail_base_img_path, detail_base_img_caption, detail_input_image_path, detail_input_image_caption],
+            inputs=[base_model, detail_lora_name, detail_base_img_path, detail_base_img_caption, detail_input_image_path, detail_input_image_caption, image_num],
             outputs=detail_output_file
         )
 
         # タグ分析ボタンの設定
-        analyze_base_img_button.click(
-            fn=analyze_tags,
-            inputs=[detail_base_img_path],
-            outputs=detail_base_img_caption
-        )
-        
-        analyze_input_img_button.click(
-            fn=analyze_tags,
-            inputs=[detail_input_image_path],
-            outputs=detail_input_image_caption
-        )
+        for i in range(50):
+            analyze_base_img_button[i].click(
+                fn=analyze_tags,
+                inputs=[detail_base_img_path],
+                outputs=detail_base_img_caption
+            )
+            
+            analyze_input_img_button[i].click(
+                fn=analyze_tags,
+                inputs=[detail_input_image_path],
+                outputs=detail_input_image_caption
+            )
 
     demo.queue()
     port = find_free_port()
