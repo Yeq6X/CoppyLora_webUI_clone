@@ -335,10 +335,10 @@ def main():
             inputs=[
                 base_model,
                 detail_lora_name,
-                {img: img for img in detail_base_img_path},
-                {text: text for text in detail_base_img_caption},
-                {img: img for img in detail_input_image_path},
-                {text: text for text in detail_input_image_caption},
+                *{img: img for img in detail_base_img_path},
+                *{text: text for text in detail_base_img_caption},
+                *{img: img for img in detail_input_image_path},
+                *{text: text for text in detail_input_image_caption},
                 image_num
             ],
             outputs=detail_output_file
