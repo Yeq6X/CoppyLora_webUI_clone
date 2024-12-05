@@ -278,7 +278,7 @@ def main():
                 base_model = gr.Dropdown(label="Base Model", choices=base_model_options, value="animagine-xl-3.1.safetensors")
                 update_button = gr.Button("List Update")
 
-            image_num = gr.Slider(label="Number of Images", min_value=1, max_value=50, step=1, default=1)
+            image_num = gr.Slider(label="Number of Images", value=1, minimum=0, maximum=50, step=1)
 
             gr.Markdown("## Base Image")
 
