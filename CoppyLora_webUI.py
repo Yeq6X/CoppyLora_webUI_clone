@@ -296,6 +296,7 @@ def main():
             gr.Markdown("## Base Image")
 
             with gr.Column():
+                nums = []
                 base_imgs = []
                 input_imgs = []
                 detail_base_img_paths = []
@@ -305,8 +306,8 @@ def main():
                 detail_input_image_captions = []
                 analyze_input_img_buttons = []
                 for i in range(50):
+                    nums.append(gr.Markdown(f"### Image {i + 1}"))
                     with gr.Row(visible=False) as row:
-                        gr.Markdown(f"### Image {i + 1}")
                         detail_base_img_path = gr.Image(label="Detail Base Input Image", type='filepath')
                         detail_base_img_caption = gr.Textbox(label="Caption Text")
                         analyze_base_img_button = gr.Button("Analyze Tags for Base Image")
@@ -363,6 +364,7 @@ def main():
         )
         
         def update_imgs_visibility(num):
+            update_nums = [gr.Markdown.update(visible=i < num) for i in range(50)]
             update_base_imgs = [gr.Row.update(visible=i < num) for i in range(50)]
             update_input_imgs = [gr.Row.update(visible=i < num) for i in range(50)]
             return update_base_imgs + update_input_imgs
@@ -370,9 +372,12 @@ def main():
         image_num.change(
             fn=update_imgs_visibility,
             inputs=[image_num],
-            outputs=base_imgs + input_imgs
+            outputs=nums + base_imgs + input_imgs
         )
-        update_imgs_visibility(1)
+        ret = update_imgs_visibility(1)
+        nums = ret[:50]
+        base_imgs = ret[50:100]
+        input_imgs = ret[100:]
 
     demo.queue()
     port = find_free_port()
