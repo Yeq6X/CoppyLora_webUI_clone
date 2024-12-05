@@ -304,7 +304,7 @@ def main():
                 for i in range(50):
                     with gr.Row(visible=False) as row:
                         with gr.Column():
-                            gr.Markdown(f"### Image {i + 1}")
+                            gr.Markdown(f"## Image {i + 1}")
                             with gr.Row():
                                 detail_base_img_path = gr.Image(label="Detail Base Input Image", type='filepath')
                                 detail_base_img_caption = gr.Textbox(label="Caption Text")
@@ -367,7 +367,6 @@ def main():
             inputs=[image_num],
             outputs = img_rows
         )
-        image_num = 1
 
     demo.queue()
     port = find_free_port()
