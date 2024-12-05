@@ -358,20 +358,15 @@ def main():
         )
         
         def update_imgs_visibility(num):
-            update_nums = [gr.Markdown.update(visible=i < num) for i in range(50)]
-            update_base_imgs = [gr.Row.update(visible=i < num) for i in range(50)]
-            update_input_imgs = [gr.Row.update(visible=i < num) for i in range(50)]
-            return update_base_imgs + update_input_imgs
+            update_img_rows = [gr.Row.update(visible=i < num) for i in range(50)]
+            return update_img_rows
 
         image_num.change(
             fn=update_imgs_visibility,
             inputs=[image_num],
-            outputs=nums + base_imgs + input_imgs
+            outputs = img_rows
         )
-        ret = update_imgs_visibility(1)
-        nums = ret[:50]
-        base_imgs = ret[50:100]
-        input_imgs = ret[100:]
+        img_rows = update_imgs_visibility(1)
 
     demo.queue()
     port = find_free_port()
