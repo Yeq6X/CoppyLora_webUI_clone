@@ -92,16 +92,13 @@ def analyze_tags(image_path):
 def detail_train(
         base_model,
         detail_lora_name,
-        _detail_base_img_path,
-        _detail_base_img_caption,
-        _detail_input_image_path,
-        _detail_input_image_caption,
-        image_num
+        image_num,
+        **kwargs
     ):
-    detail_base_img_path = [gr.update(value=img) for img in _detail_base_img_path.values()][:image_num]
-    detail_base_img_caption = [gr.update(value=text) for text in _detail_base_img_caption.values()][:image_num]
-    detail_input_image_path = [gr.update(value=img) for img in _detail_input_image_path.values()][:image_num]
-    detail_input_image_caption = [gr.update(value=text) for text in _detail_input_image_caption.values()][:image_num]
+    detail_base_img_path = [kwargs[f"detail_base_img_path_{i}"] for i in range(image_num)]
+    detail_base_img_caption = [kwargs[f"detail_base_img_caption_{i}"] for i in range(image_num)]
+    detail_input_image_path = [kwargs[f"detail_input_image_path_{i}"] for i in range(image_num)]
+    detail_input_image_caption = [kwargs[f"detail_input_image_caption_{i}"] for i in range(image_num)]
 
     # 学習データのセットアップ
     if os.path.exists(image_dir):
@@ -299,26 +296,42 @@ def main():
             gr.Markdown("## Base Image")
 
             with gr.Row():
-                detail_base_img_path = []
-                detail_base_img_caption = []
-                analyze_base_img_button = []
+                detail_base_img_paths = {}
+                detail_base_img_captions = {}
+                analyze_base_img_buttons = {}
                 for i in range(50):
-                    detail_base_img_path.append(gr.Image(label="Detail Base Input Image", type='filepath'))
-                    detail_base_img_caption.append(gr.Textbox(label="Caption Text"))
-                    analyze_base_img_button.append(gr.Button("Analyze Tags for Base Image"))
+                    detail_base_img_path = gr.Image(label="Detail Base Input Image", type='filepath')
+                    detail_base_img_caption = gr.Textbox(label="Caption Text")
+                    analyze_base_img_button = gr.Button("Analyze Tags for Base Image")
+                    analyze_base_img_button.click(
+                        fn=analyze_tags,
+                        inputs=[detail_base_img_path],
+                        outputs=detail_base_img_caption
+                    )
+                    detail_base_img_paths[f"detail_base_img_path_{i}"] = detail_base_img_path
+                    detail_base_img_captions[f"detail_base_img_caption_{i}"] = detail_base_img_caption
+                    analyze_base_img_buttons[f"analyze_base_img_button_{i}"] = analyze_base_img_button
 
             gr.Markdown("## Input Image")
 
             with gr.Row():
-                detail_input_image_path = []
-                detail_input_image_caption = []
-                analyze_input_img_button = []
+                detail_input_image_path = {}
+                detail_input_image_caption = {}
+                analyze_input_img_button = {}
                 for i in range(50):
-                    detail_input_image_path.append(gr.Image(label="Detail Input Image", type='filepath'))
-                    detail_input_image_caption.append(gr.Textbox(label="Caption Text"))
-                    analyze_input_img_button.append(gr.Button("Analyze Tags for Input Image"))
+                    detail_input_image_path = gr.Image(label="Detail Input Image", type='filepath')
+                    detail_input_image_caption = gr.Textbox(label="Caption Text")
+                    analyze_input_img_button = gr.Button("Analyze Tags for Input Image")
+                    analyze_input_img_button.click(
+                        fn=analyze_tags,
+                        inputs=[detail_input_image_path],
+                        outputs=detail_input_image_caption
+                    )
+                    detail_input_image_path[f"detail_input_image_path_{i}"] = detail_input_image_path
+                    detail_input_image_caption[f"detail_input_image_caption_{i}"] = detail_input_image_caption
+                    analyze_input_img_button[f"analyze_input_img_button_{i}"] = analyze_input_img_button
 
-            detail_lora_name = gr.Textbox(label="LoRa Name", value="mylora")
+            detail_lora_name = gr.Textbox(label="LoRa Name", value="")
             detail_train_button = gr.Button("Train")
 
         with gr.Column():
@@ -335,22 +348,17 @@ def main():
             inputs=[
                 base_model,
                 detail_lora_name,
-                *{img: img for img in detail_base_img_path},
-                *{text: text for text in detail_base_img_caption},
-                *{img: img for img in detail_input_image_path},
-                *{text: text for text in detail_input_image_caption},
-                image_num
+                image_num,
+                *detail_base_img_paths,
+                *detail_base_img_captions,
+                *detail_input_image_path,
+                *detail_input_image_caption
             ],
             outputs=detail_output_file
         )
 
         # タグ分析ボタンの設定
         for i in range(50):
-            analyze_base_img_button[i].click(
-                fn=analyze_tags,
-                inputs=[detail_base_img_path],
-                outputs=detail_base_img_caption
-            )
             
             analyze_input_img_button[i].click(
                 fn=analyze_tags,
