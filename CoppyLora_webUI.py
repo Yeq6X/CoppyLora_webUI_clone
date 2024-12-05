@@ -374,6 +374,7 @@ def main():
             fn=update_imgs_visibility,
             inputs=[image_num]
         )
+        update_imgs_visibility(1)
 
     demo.queue()
     port = find_free_port()
