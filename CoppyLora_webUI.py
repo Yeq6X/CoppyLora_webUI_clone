@@ -351,8 +351,8 @@ def main():
                 image_num,
                 *detail_base_img_paths,
                 *detail_base_img_captions,
-                *detail_input_image_path,
-                *detail_input_image_caption
+                *detail_input_image_paths,
+                *detail_input_image_captions
             ],
             outputs=detail_output_file
         )
