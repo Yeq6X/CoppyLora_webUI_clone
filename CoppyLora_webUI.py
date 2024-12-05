@@ -55,7 +55,6 @@ sdxl_dir = os.path.join(models_dir, "SDXL")
 tagger_dir = os.path.join(models_dir, "tagger")
 lora_dir = os.path.join(models_dir, "LoRA")
 train_data_dir = os.path.join(path, "train_data")
-image_dir = os.path.join(train_data_dir, "4000")
 config_path = os.path.join(path, "config.toml")
 repo_id = 'SmilingWolf/wd-swinv2-tagger-v3'
 tagger_model = tagger.modelLoad(tagger_dir, repo_id)
@@ -93,12 +92,15 @@ def detail_train(
         base_model,
         detail_lora_name,
         image_num,
+        num_epochs,
         *args,
     ):
     detail_base_img_path = args[:50][:image_num]
     detail_base_img_caption = args[50:100][:image_num]
     detail_input_image_path = args[100:150][:image_num]
     detail_input_image_caption = args[150:][:image_num]
+
+    image_dir = os.path.join(train_data_dir, f"{num_epochs}")
 
     # 学習データのセットアップ
     if os.path.exists(image_dir):
@@ -290,8 +292,10 @@ def main():
             with gr.Row():
                 base_model = gr.Dropdown(label="Base Model", choices=base_model_options, value="animagine-xl-3.1.safetensors")
                 update_button = gr.Button("List Update")
-
-            image_num = gr.Slider(label="Number of Images", value=0, minimum=0, maximum=50, step=1)
+                
+            with gr.Row():
+                image_num = gr.Number(label="Number of Images", value=0, minimum=0, maximum=50, step=1)
+                num_epochs = gr.Number(label="Number of Epochs", value=4000, minimum=0, maximum=100000, step=1000)
 
             with gr.Column():
                 img_rows = []
@@ -350,6 +354,7 @@ def main():
                 base_model,
                 detail_lora_name,
                 image_num,
+                num_epochs,
                 *detail_base_img_paths,
                 *detail_base_img_captions,
                 *detail_input_image_paths,
