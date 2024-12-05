@@ -303,15 +303,16 @@ def main():
                 analyze_input_img_buttons = []
                 for i in range(50):
                     with gr.Row(visible=False) as row:
-                        gr.Markdown(f"### Image {i + 1}")
-                        with gr.Row():
-                            detail_base_img_path = gr.Image(label="Detail Base Input Image", type='filepath')
-                            detail_base_img_caption = gr.Textbox(label="Caption Text")
-                            analyze_base_img_button = gr.Button("Analyze Tags for Base Image")
-                        with gr.Row():
-                            detail_input_image_path = gr.Image(label="Detail Input Image", type='filepath')
-                            detail_input_image_caption = gr.Textbox(label="Caption Text")
-                            analyze_input_img_button = gr.Button("Analyze Tags for Input Image")
+                        with gr.Column():
+                            gr.Markdown(f"### Image {i + 1}")
+                            with gr.Row():
+                                detail_base_img_path = gr.Image(label="Detail Base Input Image", type='filepath')
+                                detail_base_img_caption = gr.Textbox(label="Caption Text")
+                                analyze_base_img_button = gr.Button("Analyze Tags for Base Image")
+                            with gr.Row():
+                                detail_input_image_path = gr.Image(label="Detail Input Image", type='filepath')
+                                detail_input_image_caption = gr.Textbox(label="Caption Text")
+                                analyze_input_img_button = gr.Button("Analyze Tags for Input Image")
                     analyze_base_img_button.click(
                         fn=analyze_tags,
                         inputs=[detail_base_img_path],
