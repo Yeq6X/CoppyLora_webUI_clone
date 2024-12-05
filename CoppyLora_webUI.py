@@ -278,10 +278,16 @@ def main():
                 base_model = gr.Dropdown(label="Base Model", choices=base_model_options, value="animagine-xl-3.1.safetensors")
                 update_button = gr.Button("List Update")
 
+            image_num = gr.Slider(label="Number of Images", min_value=1, max_value=50, step=1, default=1)
+
+            gr.Markdown("## Base Image")
+
             with gr.Row():
-                detail_base_img_path = gr.Image(label="Detail Base Input Image", type='filepath')
-                detail_base_img_caption = gr.Textbox(label="Caption Text")
-                analyze_base_img_button = gr.Button("Analyze Tags for Base Image")
+                detail_base_img_path = [gr.Image(label="Detail Base Input Image", type='filepath')]*50
+                detail_base_img_caption = [gr.Textbox(label="Caption Text")]*50
+                analyze_base_img_button = [gr.Button("Analyze Tags for Base Image")]*50
+
+            gr.Markdown("## Input Image")
 
             with gr.Row():
                 detail_input_image_path = gr.Image(label="Detail Input Image", type='filepath')
