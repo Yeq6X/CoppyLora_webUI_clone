@@ -366,14 +366,14 @@ def main():
         )
         
         def update_imgs_visibility(num):
-            print("update_imgs_visibility", num)
-            for i in range(50):
-                base_imgs[i].visible = i < num
-                input_imgs[i].visible = i < num
-        
+            update_base_imgs = [gr.Row.update(visible=i < num) for i in range(50)]
+            update_input_imgs = [gr.Row.update(visible=i < num) for i in range(50)]
+            return update_base_imgs, update_input_imgs
+
         image_num.change(
             fn=update_imgs_visibility,
-            inputs=[image_num]
+            inputs=[image_num],
+            outputs=[base_imgs, input_imgs]
         )
         update_imgs_visibility(1)
 
