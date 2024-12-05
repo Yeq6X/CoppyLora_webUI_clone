@@ -315,9 +315,9 @@ def main():
             gr.Markdown("## Input Image")
 
             with gr.Row():
-                detail_input_image_path = {}
-                detail_input_image_caption = {}
-                analyze_input_img_button = {}
+                detail_input_image_paths = {}
+                detail_input_image_captions = {}
+                analyze_input_img_buttons = {}
                 for i in range(50):
                     detail_input_image_path = gr.Image(label="Detail Input Image", type='filepath')
                     detail_input_image_caption = gr.Textbox(label="Caption Text")
@@ -327,9 +327,9 @@ def main():
                         inputs=[detail_input_image_path],
                         outputs=detail_input_image_caption
                     )
-                    detail_input_image_path[f"detail_input_image_path_{i}"] = detail_input_image_path
-                    detail_input_image_caption[f"detail_input_image_caption_{i}"] = detail_input_image_caption
-                    analyze_input_img_button[f"analyze_input_img_button_{i}"] = analyze_input_img_button
+                    detail_input_image_paths[f"detail_input_image_path_{i}"] = detail_input_image_path
+                    detail_input_image_captions[f"detail_input_image_caption_{i}"] = detail_input_image_caption
+                    analyze_input_img_buttons[f"analyze_input_img_button_{i}"] = analyze_input_img_button
 
             detail_lora_name = gr.Textbox(label="LoRa Name", value="")
             detail_train_button = gr.Button("Train")
