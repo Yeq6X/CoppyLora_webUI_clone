@@ -295,14 +295,16 @@ def main():
 
             gr.Markdown("## Base Image")
 
-            with gr.Row():
+            with gr.Column():
+                base_imgs = []
                 detail_base_img_paths = []
                 detail_base_img_captions = []
                 analyze_base_img_buttons = []
                 for i in range(50):
-                    detail_base_img_path = gr.Image(label="Detail Base Input Image", type='filepath')
-                    detail_base_img_caption = gr.Textbox(label="Caption Text")
-                    analyze_base_img_button = gr.Button("Analyze Tags for Base Image")
+                    with gr.Row(visible=False) as row:
+                        detail_base_img_path = gr.Image(label="Detail Base Input Image", type='filepath')
+                        detail_base_img_caption = gr.Textbox(label="Caption Text")
+                        analyze_base_img_button = gr.Button("Analyze Tags for Base Image")
                     analyze_base_img_button.click(
                         fn=analyze_tags,
                         inputs=[detail_base_img_path],
@@ -312,16 +314,20 @@ def main():
                     detail_base_img_captions.append(detail_base_img_caption)
                     analyze_base_img_buttons.append(analyze_base_img_button)
 
+                    base_imgs.append(row)
+
             gr.Markdown("## Input Image")
 
-            with gr.Row():
+            with gr.Column():
+                input_imgs = []
                 detail_input_image_paths = []
                 detail_input_image_captions = []
                 analyze_input_img_buttons = []
                 for i in range(50):
-                    detail_input_image_path = gr.Image(label="Detail Input Image", type='filepath')
-                    detail_input_image_caption = gr.Textbox(label="Caption Text")
-                    analyze_input_img_button = gr.Button("Analyze Tags for Input Image")
+                    with gr.Row(visible=False) as row:
+                        detail_input_image_path = gr.Image(label="Detail Input Image", type='filepath')
+                        detail_input_image_caption = gr.Textbox(label="Caption Text")
+                        analyze_input_img_button = gr.Button("Analyze Tags for Input Image")
                     analyze_input_img_button.click(
                         fn=analyze_tags,
                         inputs=[detail_input_image_path],
@@ -330,6 +336,8 @@ def main():
                     detail_input_image_paths.append(detail_input_image_path)
                     detail_input_image_captions.append(detail_input_image_caption)
                     analyze_input_img_buttons.append(analyze_input_img_button)
+                    
+                    input_imgs.append(row)
 
             detail_lora_name = gr.Textbox(label="LoRa Name", value="")
             detail_train_button = gr.Button("Train")
@@ -355,6 +363,16 @@ def main():
                 *detail_input_image_captions
             ],
             outputs=detail_output_file
+        )
+        
+        def update_imgs_visibility(num):
+            for i in range(50):
+                base_imgs[i].visible = i < num
+                input_imgs[i].visible = i < num
+        
+        image_num.change(
+            fn=update_imgs_visibility,
+            inputs=[image_num]
         )
 
     demo.queue()
