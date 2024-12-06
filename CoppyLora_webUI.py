@@ -90,16 +90,17 @@ def analyze_tags(image_path):
 
 def detail_train(
         base_model,
-        detail_lora_name,
+        save_lora_name,
         image_num,
+        max_image_num,
         num_repeats,
         max_train_steps,
         *args,
     ):
-    detail_base_img_path = args[:50][:image_num]
-    detail_base_img_caption = args[50:100][:image_num]
-    detail_input_image_path = args[100:150][:image_num]
-    detail_input_image_caption = args[150:][:image_num]
+    detail_base_img_path = args[:max_image_num][:image_num]
+    detail_base_img_caption = args[max_image_num:2*max_image_num][:image_num]
+    detail_input_image_path = args[2*max_image_num:3*max_image_num][:image_num]
+    detail_input_image_caption = args[3*max_image_num:][:image_num]
 
     image_dir = os.path.join(train_data_dir, f"{num_repeats}")
 
@@ -111,9 +112,8 @@ def detail_train(
 
     output_dir = os.path.join(path, "output")
 
-    if os.path.exists(output_dir):
-        shutil.rmtree(output_dir)
-    os.makedirs(output_dir)
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
 
     for i in range(image_num):
         input_image = Image.open(detail_base_img_path[i])
@@ -252,7 +252,7 @@ def detail_train(
     base_lora  = os.path.join(lora_dir , f"{base_lora_name}.safetensors")
     kari_lora = os.path.join(lora_dir , f"{kari_lora_name}.safetensors")
     merge_lora = os.path.join(lora_dir , "merge_lora.safetensors")
-    train_lora = os.path.join(output_dir, f"{detail_lora_name}.safetensors")
+    train_lora = os.path.join(output_dir, f"{save_lora_name}.safetensors")
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
@@ -287,6 +287,40 @@ def detail_train(
     resize.resize(args)
     return train_lora
 
+def continuous_train(
+        base_model,
+        save_lora_name,
+        image_num,
+        num_repeats,
+        max_train_steps,
+        *args,
+    ):
+    detail_base_img_path = args[:50][:image_num]
+    detail_base_img_caption = args[50:100][:image_num]
+    detail_input_image_path = args[100:150][:image_num]
+    detail_input_image_caption = args[150:][:image_num]
+    
+    save_lora_names = [f"{save_lora_name}_{os.path.basename(detail_base_img_path[i]).split('.')[0]}" for i in range(image_num)]
+
+    train_lora_paths = []
+    for i in range(image_num):
+        train_lora_path = detail_train(
+            base_model,
+            save_lora_names[i],
+            1,
+            1,
+            num_repeats,
+            max_train_steps,
+            detail_base_img_path[i],
+            detail_base_img_caption[i],
+            detail_input_image_path[i],
+            detail_input_image_caption[i]
+        )
+        train_lora_paths.append(train_lora_path)
+        
+
+
+
 def main():
     with gr.Blocks() as demo:
         base_model_options = get_base_model_options()
@@ -299,6 +333,7 @@ def main():
                 image_num = gr.Number(label="Number of Images", value=0, minimum=0, maximum=50, step=1)
                 num_repeats = gr.Number(label="num_repeats", value=4000, minimum=0, maximum=100000, step=1000)
                 max_train_steps = gr.Number(label="max_train_steps", value=1000, minimum=0, maximum=1000000, step=1000)
+                max_image_num = gr.Number(label="max_image_num", value=50, minimum=0, maximum=50, step=1, visible=False)
 
             with gr.Column():
                 img_rows = []
@@ -339,8 +374,10 @@ def main():
                     
                     img_rows.append(row)
 
-            detail_lora_name = gr.Textbox(label="LoRa Name", value="")
-            detail_train_button = gr.Button("Train")
+            save_lora_name = gr.Textbox(label="LoRa Name", value="")
+            with gr.Row():
+                Batch_train_button = gr.Button("Train(Batch)")
+                Continuous_train_button = gr.Button("Train(Continuous)")
 
         with gr.Column():
             detail_output_file = gr.File(label="Download Output File")
@@ -351,11 +388,27 @@ def main():
             outputs=base_model
         )
 
-        detail_train_button.click(
+        Batch_train_button.click(
             fn=detail_train,
             inputs=[
                 base_model,
-                detail_lora_name,
+                save_lora_name,
+                image_num,
+                max_image_num,
+                num_repeats,
+                max_train_steps,
+                *detail_base_img_paths,
+                *detail_base_img_captions,
+                *detail_input_image_paths,
+                *detail_input_image_captions
+            ],
+            outputs=detail_output_file
+        )
+        Continuous_train_button.click(
+            fn=continuous_train,
+            inputs=[
+                base_model,
+                save_lora_name,
                 image_num,
                 num_repeats,
                 max_train_steps,
@@ -366,7 +419,7 @@ def main():
             ],
             outputs=detail_output_file
         )
-        
+
         def update_imgs_visibility(num):
             update_img_rows = [gr.Row.update(visible=i < num) for i in range(50)]
             return update_img_rows
