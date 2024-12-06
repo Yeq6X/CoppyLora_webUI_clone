@@ -319,6 +319,8 @@ def continuous_train(
         )
         train_lora_paths.append(train_lora_path)
         
+    return train_lora_paths
+        
 
 
 
