@@ -304,6 +304,7 @@ def continuous_train(
 
     train_lora_paths = []
     for i in range(image_num):
+        print(f"Train {i + 1}/{image_num} {save_lora_names[i]}")
         train_lora_path = detail_train(
             base_model,
             save_lora_names[i],
