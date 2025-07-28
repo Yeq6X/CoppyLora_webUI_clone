@@ -59,6 +59,34 @@ config_path = os.path.join(path, "config.toml")
 repo_id = 'SmilingWolf/wd-swinv2-tagger-v3'
 tagger_model = tagger.modelLoad(tagger_dir, repo_id)
 
+def find_optimal_resolution(image, target_pixels):
+    """
+    アスペクト比を保持しつつ、目標ピクセル数に近い64の倍数の解像度を計算する
+    
+    Args:
+        image: PIL Image object
+        target_pixels: 目標の総ピクセル数（例：1024*1024）
+    
+    Returns:
+        (width, height): 64の倍数に調整された解像度
+    """
+    orig_width, orig_height = image.size
+    aspect_ratio = orig_width / orig_height
+    
+    # 目標ピクセル数から初期の幅と高さを計算
+    target_height = (target_pixels / aspect_ratio) ** 0.5
+    target_width = target_height * aspect_ratio
+    
+    # 64の倍数に丸める
+    height = round(target_height / 64) * 64
+    width = round(target_width / 64) * 64
+    
+    # 最低でも64x64は保証
+    height = max(height, 64)
+    width = max(width, 64)
+    
+    return (width, height)
+
 # ベースモデル候補を取得する関数
 def get_base_model_options():
     """sdxl_dir の中身を走査してファイル名のリストを返す"""
@@ -66,7 +94,7 @@ def get_base_model_options():
 
 # base_model を選択肢として更新するための関数
 def update_base_model_options():
-    return gr.Dropdown.update(choices=get_base_model_options())
+    return gr.update(choices=get_base_model_options())
 
 def find_free_port(start_port=7860):
     """指定したポートから開始して空いているポートを見つけて返す関数"""
@@ -119,7 +147,10 @@ def detail_train(
         input_image = Image.open(detail_base_img_path[i])
 
         for size in [1024, 768, 512]:
-            resize_image = input_image.resize((size, size))
+            # アスペクト比を保持した解像度を計算
+            target_pixels = size * size
+            width, height = find_optimal_resolution(input_image, target_pixels)
+            resize_image = input_image.resize((width, height))
             resize_image.save(os.path.join(image_dir, f"{i}_{size}.png"))
 
             caption_size_txt = os.path.join(image_dir, f"{i}_{size}.txt")
@@ -192,7 +223,10 @@ def detail_train(
         input_image = Image.open(detail_input_image_path[i])
 
         for size in [1024, 768, 512]:
-            resize_image = input_image.resize((size, size))
+            # アスペクト比を保持した解像度を計算
+            target_pixels = size * size
+            width, height = find_optimal_resolution(input_image, target_pixels)
+            resize_image = input_image.resize((width, height))
             resize_image.save(os.path.join(image_dir, f"{i}_{size}.png"))
 
             caption_size_txt = os.path.join(image_dir, f"{i}_{size}.txt")
