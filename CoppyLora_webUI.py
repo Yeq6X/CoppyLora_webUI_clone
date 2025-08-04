@@ -367,7 +367,7 @@ def main():
                 update_button = gr.Button("List Update")
                 
             with gr.Row():
-                image_num = gr.Number(label="Number of Images", value=0, minimum=0, maximum=50, step=1)
+                image_num = gr.Number(label="Number of Images", value=1, minimum=0, maximum=50, step=1)
                 num_repeats = gr.Number(label="num_repeats", value=4000, minimum=0, maximum=100000, step=1000)
                 max_train_steps = gr.Number(label="max_train_steps", value=1000, minimum=0, maximum=1000000, step=1000)
                 max_image_num = gr.Number(label="max_image_num", value=50, minimum=0, maximum=50, step=1, visible=False)
