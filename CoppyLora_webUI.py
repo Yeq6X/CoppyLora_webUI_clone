@@ -381,7 +381,7 @@ def main():
                 detail_input_image_captions = []
                 analyze_input_img_buttons = []
                 for i in range(50):
-                    with gr.Row(visible=False) as row:
+                    with gr.Row(visible=(i < 1)) as row:
                         with gr.Column():
                             gr.Markdown(f"## Image {i + 1}")
                             with gr.Row():
