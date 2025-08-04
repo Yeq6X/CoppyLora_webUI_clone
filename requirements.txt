@@ -1,0 +1,6 @@
+gradio
+toml
+onnx
+onnxruntime
+opencv-python
+numpy<2.0
